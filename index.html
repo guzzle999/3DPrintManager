@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      :root {
+        --primary-color: #2c3e50;
+        --accent-color: #3498db;
+        --bg-color: #f4f7f6;
+        --card-bg: #ffffff;
+      }
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 20px;
+        color: var(--primary-color);
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        padding: 25px;
+        border-radius: 15px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      }
+      h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        color: var(--primary-color);
+      }
+      .section-title {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        color: var(--accent-color);
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .filament-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+      }
+      .filament-row select {
+        flex: 2;
+      }
+      .filament-row input {
+        flex: 1;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+      }
+      select, input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-sizing: border-box;
+        font-size: 14px;
+      }
+      button {
+        width: 100%;
+        padding: 15px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+        margin-top: 20px;
+      }
+      button:hover {
+        background-color: #2980b9;
+      }
+      .result-card {
+        margin-top: 25px;
+        padding: 20px;
+        background: #e8f4fd;
+        border-radius: 10px;
+        display: none;
+      }
+      .result-item {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        border-bottom: 1px solid #d1e8f7;
+        padding-bottom: 5px;
+      }
+      .result-item:last-child {
+        border-bottom: none;
+        font-size: 1.2em;
+        font-weight: bold;
+        color: #27ae60;
+      }
+      .loader {
+        text-align: center;
+        display: none;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>3D Print Calculator (4 Colors)</h2>
+      
+      <div class="form-group">
+        <label>Printer</label>
+        <select id="printerSelect"><option>Loading...</option></select>
+      </div>
+      
+      <div class="section-title">Filaments (AMS Lite / 4 Slots)</div>
+      <div id="filamentRows">
+        <div class="filament-row">
+          <select class="f-select"><option value="">-- Slot 1 --</option></select>
+          <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
+        </div>
+        <div class="filament-row">
+          <select class="f-select"><option value="">-- Slot 2 --</option></select>
+          <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
+        </div>
+        <div class="filament-row">
+          <select class="f-select"><option value="">-- Slot 3 --</option></select>
+          <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
+        </div>
+        <div class="filament-row">
+          <select class="f-select"><option value="">-- Slot 4 --</option></select>
+          <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
+        </div>
+      </div>
+
+      <div class="section-title">Print Details</div>
+      <div class="form-group">
+        <label>Wipe Tower / Waste (Grams)</label>
+        <input type="number" id="wasteWeight" placeholder="From Slicer (e.g. 50)" step="0.1">
+      </div>
+      
+      <div class="form-group">
+        <label>Total Print Time (Hours)</label>
+        <input type="number" id="printTime" placeholder="e.g. 12.5" step="0.1">
+      </div>
+      
+      <div class="form-group">
+        <label>Profit Margin (%)</label>
+        <input type="number" id="margin" value="30">
+      </div>
+      
+      <button onclick="calculate()">Calculate Cost</button>
+      
+      <div class="loader" id="loader">Calculating...</div>
+      
+      <div class="result-card" id="resultCard">
+        <div class="result-item"><span>Total Filament Cost:</span> <span id="resFilament">0</span></div>
+        <div class="result-item"><span>Electricity Cost:</span> <span id="resElectricity">0</span></div>
+        <div class="result-item"><span>Labor & Wear Cost:</span> <span id="resLabor">0</span></div>
+        <div class="result-item"><span>Total Cost:</span> <span id="resTotal">0</span></div>
+        <div class="result-item"><span>Suggested Price:</span> <span id="resPrice">0</span></div>
+      </div>
+    </div>
+
+    <script>
+      let filamentList = [];
+
+      window.onload = function() {
+        google.script.run.withSuccessHandler(function(data) {
+          updatePrinters(data.printers);
+          filamentList = data.filaments;
+          updateFilaments();
+        }).getDropdownData();
+      };
+
+      function updatePrinters(printers) {
+        const select = document.getElementById('printerSelect');
+        select.innerHTML = '';
+        printers.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.innerHTML = p;
+          select.appendChild(opt);
+        });
+      }
+
+      function updateFilaments() {
+        const selects = document.querySelectorAll('.f-select');
+        selects.forEach((s, index) => {
+          s.innerHTML = `<option value="">-- Slot ${index+1} --</option>`;
+          filamentList.forEach(f => {
+            const opt = document.createElement('option');
+            opt.value = f; opt.innerHTML = f;
+            s.appendChild(opt);
+          });
+        });
+      }
+
+      function calculate() {
+        const printer = document.getElementById('printerSelect').value;
+        const time = parseFloat(document.getElementById('printTime').value);
+        const waste = parseFloat(document.getElementById('wasteWeight').value) || 0;
+        const margin = parseFloat(document.getElementById('margin').value);
+        
+        const filaments = [];
+        const selects = document.querySelectorAll('.f-select');
+        const weights = document.querySelectorAll('.f-weight');
+        
+        selects.forEach((s, i) => {
+          if (s.value) {
+            filaments.push({ id: s.value, weight: parseFloat(weights[i].value) || 0 });
+          }
+        });
+
+        if (filaments.length === 0 || !time) {
+          alert('Please select at least one filament and enter print time.');
+          return;
+        }
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultCard').style.display = 'none';
+
+        google.script.run.withSuccessHandler(function(results) {
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('resultCard').style.display = 'block';
+          
+          document.getElementById('resFilament').innerHTML = results.filamentCost.toFixed(2) + ' THB';
+          document.getElementById('resElectricity').innerHTML = results.electricityCost.toFixed(2) + ' THB';
+          document.getElementById('resLabor').innerHTML = (results.laborCost + results.wearAndTearCost).toFixed(2) + ' THB';
+          document.getElementById('resTotal').innerHTML = results.totalCost.toFixed(2) + ' THB';
+          document.getElementById('resPrice').innerHTML = results.suggestedPrice.toFixed(2) + ' THB';
+        }).calculateCost(printer, filaments, waste, time, 15, margin);
+      }
+    </script>
+  </body>
+</html>
