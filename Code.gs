@@ -64,7 +64,11 @@ function setupSheets() {
   inv.getRange('A1:I1').setValues([
     ['Spool ID', 'Brand', 'Material', 'Color', 'Total Weight (g)', 'Cost per Spool', 'Cost per Gram', 'Remaining Weight (g)', 'Status']
   ]).setFontWeight('bold');
+  
+  // Formulas
   inv.getRange('G2:G100').setFormula('=IF(E2>0, F2/E2, 0)');
+  inv.getRange('H2:H100').setFormula('=IF(E2>0, E2, 0)'); // เริ่มต้น Remaining = Total
+  inv.getRange('I2:I100').setFormula('=IF(H2<=0, "Out of Stock", IF(H2<200, "Low Stock", "Available"))');
 
   // 3. Calculator Sheet (Layout for 4 colors + Wipe Tower)
   const calc = ss.getSheetByName('Calculator') || ss.insertSheet('Calculator');
@@ -102,8 +106,8 @@ function setupSheets() {
   // 4. Orders Sheet
   const orders = ss.getSheetByName('Orders') || ss.insertSheet('Orders');
   orders.clear();
-  orders.getRange('A1:G1').setValues([
-    ['Order ID', 'Date', 'Project Name', 'Customer', 'Filament IDs', 'Total Weight (g)', 'Status']
+  orders.getRange('A1:I1').setValues([
+    ['Order ID', 'Date', 'Project Name', 'Printer', 'Filament IDs', 'Total Weight (g)', 'Total Cost', 'Suggested Price', 'Status']
   ]).setFontWeight('bold');
 
   SpreadsheetApp.getUi().alert('สร้างโครงสร้างตารางใหม่ (รองรับ 4 สี) เรียบร้อยแล้ว!');
@@ -234,10 +238,67 @@ function syncSettings() {
 }
 
 /**
- * หักสต็อกเมื่อออเดอร์เสร็จสิ้น (Simple version)
+ * หักสต็อกเมื่อออเดอร์เสร็จสิ้น (Version 3.1)
  */
-function completeOrder() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const ordersSheet = ss.getSheetByName('Orders');
-  SpreadsheetApp.getUi().alert('ฟังก์ชันตัดสต็อกหลายสีกำลังพัฒนาในเวอร์ชันถัดไป กรุณาหักในหน้า Inventory ด้วยตนเอง');
+function deductStock(projectName, printer, filaments, waste, printTime, totalCost, suggestedPrice) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const invSheet = ss.getSheetByName('Inventory');
+    const orderSheet = ss.getSheetByName('Orders');
+    const invData = invSheet.getDataRange().getValues();
+    
+    let warnings = [];
+    let totalWeightUsed = 0;
+    
+    // 1. คำนวณน้ำหนักรวมของเส้นที่ใช้ (ไม่รวม Waste)
+    const netWeight = filaments.reduce((sum, f) => sum + f.weight, 0);
+    
+    // 2. หักสต็อก
+    filaments.forEach(f => {
+      // ค้นหาแถวของเส้นลวด
+      for (let i = 1; i < invData.length; i++) {
+        if (invData[i][0] === f.id) {
+          let currentWeight = invData[i][7]; // Column H: Remaining Weight (g)
+          
+          // ถ้า Remaining Weight เป็นค่าว่างหรือ 0 ให้ใช้ Total Weight (Index 4) เป็นค่าเริ่มต้น
+          if (currentWeight === "" || currentWeight === 0) {
+            currentWeight = invData[i][4];
+          }
+          
+          // คำนวณส่วนแบ่ง Waste (ถ้ามี)
+          const wasteShare = netWeight > 0 ? (f.weight / netWeight) * waste : 0;
+          const totalUsed = f.weight + wasteShare;
+          
+          const newWeight = currentWeight - totalUsed;
+          invSheet.getRange(i + 1, 8).setValue(newWeight);
+          
+          // เช็คแจ้งเตือนของใกล้หมด (Threshold: 200g)
+          if (newWeight < 200) {
+            warnings.push(`${f.id} เหลือเพียง ${newWeight.toFixed(1)}g`);
+          }
+          
+          totalWeightUsed += totalUsed;
+          break;
+        }
+      }
+    });
+    
+    // 3. บันทึกข้อมูลลงหน้า Orders
+    const filamentIds = filaments.map(f => f.id).join(', ');
+    orderSheet.appendRow([
+      "ORD-" + Utilities.formatDate(new Date(), "GMT+7", "yyyyMMdd-HHmm"),
+      new Date(),
+      projectName,
+      printer,
+      filamentIds,
+      totalWeightUsed.toFixed(1),
+      totalCost,
+      suggestedPrice,
+      "Completed"
+    ]);
+    
+    return { success: true, warnings: warnings };
+  } catch (e) {
+    return { success: false, message: e.toString() };
+  }
 }

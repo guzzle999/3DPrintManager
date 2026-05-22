@@ -3,152 +3,267 @@
   <head>
     <base target="_top">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
       :root {
-        --primary-color: #2c3e50;
-        --accent-color: #3498db;
-        --bg-color: #f4f7f6;
-        --card-bg: #ffffff;
+        --bg-color: #0f172a;
+        --card-bg: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-purple: #a855f7;
+        --accent-pink: #ec4899;
+        --accent-blue: #3b82f6;
+        --accent-green: #22c55e;
+        --input-bg: #334155;
+        --input-border: #475569;
       }
+      
       body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Plus Jakarta Sans', sans-serif;
         background-color: var(--bg-color);
+        background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 100%);
         margin: 0;
         padding: 20px;
-        color: var(--primary-color);
+        color: var(--text-primary);
+        min-height: 100vh;
       }
+
       .container {
-        max-width: 600px;
+        max-width: 650px;
         margin: 0 auto;
         background: var(--card-bg);
-        padding: 25px;
-        border-radius: 15px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 30px;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
       }
+
       h2 {
         text-align: center;
-        margin-bottom: 25px;
-        color: var(--primary-color);
+        margin-bottom: 30px;
+        background: linear-gradient(to right, var(--accent-purple), var(--accent-pink));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2rem;
+        font-weight: 800;
       }
+
       .section-title {
         font-size: 1.1em;
-        font-weight: bold;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        color: var(--accent-color);
-        border-bottom: 2px solid #eee;
-        padding-bottom: 5px;
-      }
-      .form-group {
+        font-weight: 700;
+        margin-top: 25px;
         margin-bottom: 15px;
-      }
-      .filament-row {
+        color: var(--accent-blue);
         display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
         align-items: center;
+        gap: 8px;
       }
-      .filament-row select {
-        flex: 2;
+
+      .section-title::after {
+        content: "";
+        flex-grow: 1;
+        height: 1px;
+        background: var(--input-border);
       }
-      .filament-row input {
-        flex: 1;
+
+      .form-group {
+        margin-bottom: 20px;
       }
+
       label {
         display: block;
-        margin-bottom: 5px;
-        font-weight: bold;
-        font-size: 0.9em;
+        margin-bottom: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
       }
+
       select, input {
         width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
+        padding: 12px 16px;
+        background-color: var(--input-bg);
+        border: 1.5px solid var(--input-border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.2s;
         box-sizing: border-box;
-        font-size: 14px;
       }
+
+      select:focus, input:focus {
+        outline: none;
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+      }
+
+      .filament-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .time-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
       button {
-        width: 100%;
-        padding: 15px;
-        background-color: var(--accent-color);
-        color: white;
+        padding: 14px 20px;
         border: none;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: bold;
+        border-radius: 14px;
+        font-size: 1rem;
+        font-weight: 700;
         cursor: pointer;
-        transition: background 0.3s;
-        margin-top: 20px;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
       }
+
+      .btn-calc {
+        background: linear-gradient(135deg, var(--accent-blue), #2563eb);
+        color: white;
+      }
+
+      .btn-deduct {
+        background: linear-gradient(135deg, var(--accent-purple), #7e22ce);
+        color: white;
+      }
+
       button:hover {
-        background-color: #2980b9;
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
       }
+
+      button:active {
+        transform: translateY(0);
+      }
+
       .result-card {
-        margin-top: 25px;
-        padding: 20px;
-        background: #e8f4fd;
-        border-radius: 10px;
+        margin-top: 30px;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.5);
+        border-radius: 18px;
+        border: 1px solid var(--input-border);
         display: none;
+        animation: slideUp 0.3s ease-out;
       }
+
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
       .result-item {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 8px;
-        border-bottom: 1px solid #d1e8f7;
-        padding-bottom: 5px;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       }
+
       .result-item:last-child {
         border-bottom: none;
-        font-size: 1.2em;
-        font-weight: bold;
-        color: #27ae60;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 2px solid var(--input-border);
       }
+
+      .res-label {
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .res-value {
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .res-price {
+        font-size: 1.4rem;
+        color: var(--accent-green) !important;
+      }
+
       .loader {
         text-align: center;
         display: none;
-        margin-top: 10px;
+        margin-top: 20px;
+        color: var(--accent-blue);
+        font-weight: 600;
       }
+
+      .alert {
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-size: 0.9rem;
+        display: none;
+      }
+      .alert-success { background: rgba(34, 197, 94, 0.1); color: var(--accent-green); border: 1px solid rgba(34, 197, 94, 0.2); }
+      .alert-warning { background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid rgba(234, 179, 8, 0.2); }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>3D Print Calculator (4 Colors)</h2>
+      <h2>3D Print Manager</h2>
       
       <div class="form-group">
-        <label>Printer</label>
+        <label>Project Name</label>
+        <input type="text" id="projectName" placeholder="e.g. Baby Groot Statue">
+      </div>
+
+      <div class="form-group">
+        <label>Printer Profile</label>
         <select id="printerSelect"><option>Loading...</option></select>
       </div>
       
-      <div class="section-title">Filaments (AMS Lite / 4 Slots)</div>
+      <div class="section-title">Filament Slots</div>
       <div id="filamentRows">
-        <div class="filament-row">
+        <div class="filament-grid">
           <select class="f-select"><option value="">-- Slot 1 --</option></select>
           <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
         </div>
-        <div class="filament-row">
+        <div class="filament-grid">
           <select class="f-select"><option value="">-- Slot 2 --</option></select>
           <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
         </div>
-        <div class="filament-row">
+        <div class="filament-grid">
           <select class="f-select"><option value="">-- Slot 3 --</option></select>
           <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
         </div>
-        <div class="filament-row">
+        <div class="filament-grid">
           <select class="f-select"><option value="">-- Slot 4 --</option></select>
           <input type="number" class="f-weight" placeholder="Weight (g)" step="0.1">
         </div>
       </div>
 
-      <div class="section-title">Print Details</div>
+      <div class="section-title">Print Settings</div>
       <div class="form-group">
         <label>Wipe Tower / Waste (Grams)</label>
-        <input type="number" id="wasteWeight" placeholder="From Slicer (e.g. 50)" step="0.1">
+        <input type="number" id="wasteWeight" placeholder="0.0" step="0.1">
       </div>
       
       <div class="form-group">
-        <label>Total Print Time (Hours)</label>
-        <input type="number" id="printTime" placeholder="e.g. 12.5" step="0.1">
+        <label>Total Print Time</label>
+        <div class="time-grid">
+          <div>
+            <input type="number" id="printHrs" placeholder="Hours" min="0">
+          </div>
+          <div>
+            <input type="number" id="printMins" placeholder="Minutes" min="0" max="59">
+          </div>
+        </div>
       </div>
       
       <div class="form-group">
@@ -156,21 +271,45 @@
         <input type="number" id="margin" value="30">
       </div>
       
-      <button onclick="calculate()">Calculate Cost</button>
+      <div class="button-group">
+        <button class="btn-calc" onclick="calculate()">
+          <span>📊</span> Calculate
+        </button>
+        <button class="btn-deduct" id="deductBtn" onclick="deductStock()" disabled>
+          <span>📦</span> Save & Deduct Stock
+        </button>
+      </div>
       
-      <div class="loader" id="loader">Calculating...</div>
+      <div class="loader" id="loader">Processing...</div>
+      <div id="statusAlert" class="alert"></div>
       
       <div class="result-card" id="resultCard">
-        <div class="result-item"><span>Total Filament Cost:</span> <span id="resFilament">0</span></div>
-        <div class="result-item"><span>Electricity Cost:</span> <span id="resElectricity">0</span></div>
-        <div class="result-item"><span>Labor & Wear Cost:</span> <span id="resLabor">0</span></div>
-        <div class="result-item"><span>Total Cost:</span> <span id="resTotal">0</span></div>
-        <div class="result-item"><span>Suggested Price:</span> <span id="resPrice">0</span></div>
+        <div class="result-item">
+          <span class="res-label">Filament Cost</span>
+          <span class="res-value" id="resFilament">0.00 THB</span>
+        </div>
+        <div class="result-item">
+          <span class="res-label">Electricity Cost</span>
+          <span class="res-value" id="resElectricity">0.00 THB</span>
+        </div>
+        <div class="result-item">
+          <span class="res-label">Labor & Wear</span>
+          <span class="res-value" id="resLabor">0.00 THB</span>
+        </div>
+        <div class="result-item">
+          <span class="res-label">Total Base Cost</span>
+          <span class="res-value" id="resTotal">0.00 THB</span>
+        </div>
+        <div class="result-item">
+          <span class="res-label">Suggested Price</span>
+          <span class="res-value res-price" id="resPrice">0.00 THB</span>
+        </div>
       </div>
     </div>
 
     <script>
       let filamentList = [];
+      let lastCalcData = null;
 
       window.onload = function() {
         google.script.run.withSuccessHandler(function(data) {
@@ -202,9 +341,19 @@
         });
       }
 
+      function showAlert(msg, type) {
+        const alert = document.getElementById('statusAlert');
+        alert.innerHTML = msg;
+        alert.style.display = 'block';
+        alert.className = 'alert alert-' + type;
+      }
+
       function calculate() {
         const printer = document.getElementById('printerSelect').value;
-        const time = parseFloat(document.getElementById('printTime').value);
+        const hrs = parseFloat(document.getElementById('printHrs').value) || 0;
+        const mins = parseFloat(document.getElementById('printMins').value) || 0;
+        const time = hrs + (mins / 60);
+        
         const waste = parseFloat(document.getElementById('wasteWeight').value) || 0;
         const margin = parseFloat(document.getElementById('margin').value);
         
@@ -218,13 +367,14 @@
           }
         });
 
-        if (filaments.length === 0 || !time) {
-          alert('Please select at least one filament and enter print time.');
+        if (filaments.length === 0 || time <= 0) {
+          alert('Please enter filaments and print time.');
           return;
         }
 
         document.getElementById('loader').style.display = 'block';
         document.getElementById('resultCard').style.display = 'none';
+        document.getElementById('statusAlert').style.display = 'none';
 
         google.script.run.withSuccessHandler(function(results) {
           document.getElementById('loader').style.display = 'none';
@@ -235,7 +385,52 @@
           document.getElementById('resLabor').innerHTML = (results.laborCost + results.wearAndTearCost).toFixed(2) + ' THB';
           document.getElementById('resTotal').innerHTML = results.totalCost.toFixed(2) + ' THB';
           document.getElementById('resPrice').innerHTML = results.suggestedPrice.toFixed(2) + ' THB';
+          
+          // Store data for deduction
+          lastCalcData = {
+            projectName: document.getElementById('projectName').value || 'Unnamed Project',
+            printer: printer,
+            filaments: filaments,
+            waste: waste,
+            time: time,
+            totalCost: results.totalCost,
+            suggestedPrice: results.suggestedPrice
+          };
+          document.getElementById('deductBtn').disabled = false;
         }).calculateCost(printer, filaments, waste, time, 15, margin);
+      }
+
+      function deductStock() {
+        if (!lastCalcData) return;
+        
+        const btn = document.getElementById('deductBtn');
+        btn.disabled = true;
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('loader').innerHTML = 'Updating Inventory...';
+
+        google.script.run.withSuccessHandler(function(response) {
+          document.getElementById('loader').style.display = 'none';
+          document.getElementById('loader').innerHTML = 'Processing...';
+          
+          if (response.success) {
+            showAlert('✅ Stock deducted and order saved!', 'success');
+            if (response.warnings && response.warnings.length > 0) {
+              const warningMsg = '<br>⚠️ <b>Low Stock Alert:</b><br>' + response.warnings.join('<br>');
+              showAlert(document.getElementById('statusAlert').innerHTML + warningMsg, 'warning');
+            }
+          } else {
+            showAlert('❌ Error: ' + response.message, 'warning');
+            btn.disabled = false;
+          }
+        }).deductStock(
+          lastCalcData.projectName, 
+          lastCalcData.printer, 
+          lastCalcData.filaments, 
+          lastCalcData.waste, 
+          lastCalcData.time,
+          lastCalcData.totalCost,
+          lastCalcData.suggestedPrice
+        );
       }
     </script>
   </body>
